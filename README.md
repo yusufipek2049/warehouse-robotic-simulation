@@ -22,7 +22,7 @@ Her robot kendi konumunu, hedefini, durumunu, atanmış görevini, rotasını, k
 
 ## Simülasyon Akışı
 
-Simülasyon zaman adımlarıyla ilerler. Her adımda bekleyen görevler kontrol edilir, boşta olan robotlara görev atanır, BFS ile rota hesaplanır ve robotlar rotalarındaki bir sonraki hücreye ilerler. Temel trafik kontrolü sayesinde iki robot aynı anda aynı hücreye giremez; hedef hücre uygun değilse robot o adımda bekler ve bekleme süresi metriğe eklenir.
+Simülasyon zaman adımlarıyla ilerler. Her adımda bekleyen görevler kontrol edilir, boşta olan robotlara görev atanır, BFS ile rota hesaplanır ve robotlar rotalarındaki bir sonraki hücreye ilerler. Temel trafik kontrolü sayesinde iki robot aynı anda aynı hücreye giremez. Hedef hücre uygun değilse robot o adımda bekler ve bekleme süresi metriğe eklenir.
 
 ## Ana Senaryo
 
@@ -80,4 +80,4 @@ Ayrıca aşağıdaki grafikler PNG formatında üretilir:
 
 ## Sonuçları Yorumlama
 
-Robot sayısı arttıkça toplam tamamlanma süresinin azalması beklenir; ancak depo trafiği sıkışmaya başladığında bu iyileşme sınırlanabilir. Throughput değerinin yükselmesi, sistemin birim zamanda daha fazla görev tamamladığını gösterir. Ortalama bekleme süresi ve bloklanma sayısı ise robot sayısı arttığında depo içi trafiğin ne kadar zorlandığını anlamak için kullanılır.
+Robot sayısı arttıkça toplam tamamlanma süresinin azalması beklenir ancak depo trafiği sıkışmaya başladığında bu iyileşme sınırlanabilir. Throughput değerinin yükselmesi, sistemin birim zamanda daha fazla görev tamamladığını gösterir. Ortalama bekleme süresi ve bloklanma sayısı ise robot sayısı arttığında depo içi trafiğin ne kadar zorlandığını anlamak için kullanılır.
