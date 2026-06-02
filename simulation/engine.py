@@ -115,16 +115,53 @@ class SimulationEngine:
             if target is not None and self._robot_by_id(robot_id).status != "idle"
         }
         occupied_positions = {robot.current_position for robot in self.robots}
+        robot_by_position = {robot.current_position: robot for robot in self.robots}
 
-        for robot in self.robots:
-            if robot.status != "idle" or robot.current_position not in requested_targets:
-                continue
-            for neighbor in self.warehouse.neighbors(robot.current_position):
-                if neighbor in occupied_positions or neighbor in requested_targets:
+        changed = True
+        while changed:
+            changed = False
+            for robot in self.robots:
+                if (
+                    robot.status != "idle"
+                    or desired_moves.get(robot.robot_id) is not None
+                    or robot.current_position not in requested_targets
+                ):
                     continue
-                desired_moves[robot.robot_id] = neighbor
-                occupied_positions.add(neighbor)
-                break
+
+                target = self._find_idle_yield_target(
+                    robot,
+                    occupied_positions,
+                    requested_targets,
+                    robot_by_position,
+                    desired_moves,
+                )
+                if target is not None:
+                    desired_moves[robot.robot_id] = target
+                    requested_targets.add(target)
+                    changed = True
+
+    def _find_idle_yield_target(
+        self,
+        robot: Robot,
+        occupied_positions: set[Position],
+        requested_targets: set[Position],
+        robot_by_position: dict[Position, Robot],
+        desired_moves: dict[int, Position | None],
+    ) -> Position | None:
+        for neighbor in self.warehouse.neighbors(robot.current_position):
+            if neighbor not in occupied_positions and neighbor not in requested_targets:
+                return neighbor
+
+        for neighbor in self.warehouse.neighbors(robot.current_position):
+            blocking_robot = robot_by_position.get(neighbor)
+            if (
+                blocking_robot is not None
+                and blocking_robot.status == "idle"
+                and desired_moves.get(blocking_robot.robot_id) is None
+                and neighbor not in requested_targets
+            ):
+                return neighbor
+        return None
 
     def _robot_by_id(self, robot_id: int) -> Robot:
         for robot in self.robots:

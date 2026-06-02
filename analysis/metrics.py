@@ -26,3 +26,36 @@ def calculate_summary(robot_count: int, total_time: int, robots: list[Robot], ta
         "blocked_waiting_count": blocked_count,
     }
 
+
+def calculate_replication_summary(rows: list[dict[str, float | int]]) -> list[dict[str, float | int]]:
+    import math
+
+    import pandas as pd
+
+    data = pd.DataFrame(rows)
+    summary_rows: list[dict[str, float | int]] = []
+    metric_columns = [
+        "total_completion_time",
+        "average_task_completion_time",
+        "throughput",
+        "robot_utilization",
+        "average_waiting_time",
+        "total_distance",
+        "blocked_waiting_count",
+    ]
+
+    for robot_count, group in data.groupby("robot_count"):
+        summary: dict[str, float | int] = {
+            "robot_count": int(robot_count),
+            "replications": int(len(group)),
+        }
+        for column in metric_columns:
+            mean = float(group[column].mean())
+            std = float(group[column].std(ddof=1))
+            ci95 = 1.96 * std / math.sqrt(len(group)) if len(group) > 1 else 0.0
+            summary[f"{column}_mean"] = mean
+            summary[f"{column}_std"] = std
+            summary[f"{column}_ci95"] = ci95
+        summary_rows.append(summary)
+
+    return summary_rows

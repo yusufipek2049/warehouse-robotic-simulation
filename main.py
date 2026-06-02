@@ -2,13 +2,19 @@ import random
 
 import pandas as pd
 
-from analysis.metrics import calculate_summary
-from analysis.plots import plot_summary_metrics, plot_waiting_tasks_over_time
+from analysis.metrics import calculate_replication_summary, calculate_summary
+from analysis.plots import (
+    plot_replication_confidence_intervals,
+    plot_summary_metrics,
+    plot_waiting_tasks_over_time,
+)
 from config.settings import (
     MAX_STEPS,
     OUTPUT_FIGURES_DIR,
     OUTPUT_TABLES_DIR,
     RANDOM_SEED,
+    REPLICATION_BASE_SEED,
+    REPLICATION_COUNT,
     ROBOT_COUNTS,
     TASK_COUNT,
     WAREHOUSE_HEIGHT,
@@ -57,9 +63,9 @@ def create_robots(warehouse: Warehouse, robot_count: int) -> list[Robot]:
     ]
 
 
-def run_scenario(robot_count: int) -> tuple[dict[str, float | int], pd.DataFrame]:
+def run_scenario(robot_count: int, seed: int = RANDOM_SEED) -> tuple[dict[str, float | int], pd.DataFrame]:
     warehouse = Warehouse.create_default(width=WAREHOUSE_WIDTH, height=WAREHOUSE_HEIGHT)
-    tasks = create_tasks(warehouse, TASK_COUNT, RANDOM_SEED)
+    tasks = create_tasks(warehouse, TASK_COUNT, seed)
     robots = create_robots(warehouse, robot_count)
 
     engine = SimulationEngine(
@@ -78,6 +84,22 @@ def run_scenario(robot_count: int) -> tuple[dict[str, float | int], pd.DataFrame
     )
     history = pd.DataFrame(result["history"])
     return summary, history
+
+
+def run_replications() -> tuple[pd.DataFrame, pd.DataFrame]:
+    raw_rows: list[dict[str, float | int]] = []
+
+    for robot_count in ROBOT_COUNTS:
+        for replication in range(1, REPLICATION_COUNT + 1):
+            seed = REPLICATION_BASE_SEED + replication - 1
+            summary, _ = run_scenario(robot_count, seed=seed)
+            summary["replication"] = replication
+            summary["seed"] = seed
+            raw_rows.append(summary)
+
+    raw_results = pd.DataFrame(raw_rows)
+    summary_results = pd.DataFrame(calculate_replication_summary(raw_rows))
+    return raw_results, summary_results
 
 
 def main() -> None:
@@ -99,6 +121,11 @@ def main() -> None:
     plot_summary_metrics(results, OUTPUT_FIGURES_DIR)
     plot_waiting_tasks_over_time(histories, OUTPUT_FIGURES_DIR)
 
+    replication_results, replication_summary = run_replications()
+    replication_results.to_csv(OUTPUT_TABLES_DIR / "replications_raw.csv", index=False)
+    replication_summary.to_csv(OUTPUT_TABLES_DIR / "replication_summary.csv", index=False)
+    plot_replication_confidence_intervals(replication_summary, OUTPUT_FIGURES_DIR)
+
     display_results = results.rename(
         columns={
             "robot_count": "Robot sayısı",
@@ -115,7 +142,23 @@ def main() -> None:
 
     print("\nWarehouse Robotics Simulation - Özet sonuçlar")
     print(display_results.to_string(index=False))
+    print("\n100 replikasyon özeti")
+    print(
+        replication_summary[
+            [
+                "robot_count",
+                "replications",
+                "total_completion_time_mean",
+                "total_completion_time_ci95",
+                "throughput_mean",
+                "throughput_ci95",
+                "blocked_waiting_count_mean",
+                "blocked_waiting_count_ci95",
+            ]
+        ].to_string(index=False)
+    )
     print(f"\nSonuç tablosu kaydedildi: {OUTPUT_TABLES_DIR / 'results.csv'}")
+    print(f"Replikasyon özeti kaydedildi: {OUTPUT_TABLES_DIR / 'replication_summary.csv'}")
     print(f"Grafikler bu klasöre kaydedildi: {OUTPUT_FIGURES_DIR}")
 
 

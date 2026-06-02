@@ -66,6 +66,8 @@ python -m unittest
 Simülasyon tamamlandığında özet sonuç tablosu ve zaman serisi kayıtları CSV olarak kaydedilir.
 
 - `outputs/tables/results.csv`
+- `outputs/tables/replications_raw.csv`
+- `outputs/tables/replication_summary.csv`
 - `outputs/tables/time_series_robot_2.csv`
 - `outputs/tables/time_series_robot_4.csv`
 - `outputs/tables/time_series_robot_6.csv`
@@ -77,6 +79,8 @@ Ayrıca aşağıdaki grafikler PNG formatında üretilir:
 - `outputs/figures/throughput_by_robot_count.png`
 - `outputs/figures/average_waiting_time_by_robot_count.png`
 - `outputs/figures/waiting_tasks_over_time.png`
+- `outputs/figures/replication_total_completion_time_ci.png`
+- `outputs/figures/replication_throughput_ci.png`
 
 ## Sonuçları Yorumlama
 

@@ -51,6 +51,31 @@ def plot_waiting_tasks_over_time(histories: dict[int, pd.DataFrame], output_dir:
     plt.close()
 
 
+def plot_replication_confidence_intervals(replication_summary: pd.DataFrame, output_dir: Path) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    _errorbar_plot(
+        replication_summary,
+        "robot_count",
+        "total_completion_time_mean",
+        "total_completion_time_ci95",
+        "100 Replikasyon: Ortalama Toplam Tamamlanma Süresi",
+        "Robot sayısı",
+        "Ortalama zaman adımı",
+        output_dir / "replication_total_completion_time_ci.png",
+    )
+    _errorbar_plot(
+        replication_summary,
+        "robot_count",
+        "throughput_mean",
+        "throughput_ci95",
+        "100 Replikasyon: Ortalama Throughput",
+        "Robot sayısı",
+        "Tamamlanan görev / zaman",
+        output_dir / "replication_throughput_ci.png",
+    )
+
+
 def _line_plot(
     data: pd.DataFrame,
     x_column: str,
@@ -62,6 +87,33 @@ def _line_plot(
 ) -> None:
     plt.figure(figsize=(8, 5))
     plt.plot(data[x_column], data[y_column], marker="o")
+    plt.title(title)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150)
+    plt.close()
+
+
+def _errorbar_plot(
+    data: pd.DataFrame,
+    x_column: str,
+    y_column: str,
+    error_column: str,
+    title: str,
+    xlabel: str,
+    ylabel: str,
+    output_path: Path,
+) -> None:
+    plt.figure(figsize=(8, 5))
+    plt.errorbar(
+        data[x_column],
+        data[y_column],
+        yerr=data[error_column],
+        marker="o",
+        capsize=5,
+    )
     plt.title(title)
     plt.xlabel(xlabel)
     plt.ylabel(ylabel)
