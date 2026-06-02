@@ -1,0 +1,15 @@
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+OUTPUT_TABLES_DIR = BASE_DIR / "outputs" / "tables"
+OUTPUT_FIGURES_DIR = BASE_DIR / "outputs" / "figures"
+
+WAREHOUSE_WIDTH = 20
+WAREHOUSE_HEIGHT = 20
+TASK_COUNT = 100
+ROBOT_COUNTS = [2, 4, 6, 8]
+ROBOT_SPEED = 1
+MAX_STEPS = 10_000
+RANDOM_SEED = 42
+
